@@ -26,6 +26,7 @@ const userSchema: Schema = new Schema<IUser>(
             password_reset_token: { type: String, default: '' },
             fine: { type: Number, default: 0 },
             refreshToken: { type: String, default: '' },
+            // Add any additional fields needed for authentication
       },
       { timestamps: true }
 );
@@ -43,16 +44,6 @@ userSchema.pre('save', async function (next) {
 
       next();
 });
-
-// //post middleware /hook
-// userSchema.post('save', function (doc, next) {
-//     doc.password = '';
-//     if (doc.verificationInfo) {
-//         doc.verificationInfo.OTP = '';
-//     }
-//     doc.secureFolderPin = '';
-//     next();
-// });
 
 userSchema.statics.isUserExistsByEmail = async function (email: string) {
       return await User.findOne({ email }).select('+password +secureFolderPin');

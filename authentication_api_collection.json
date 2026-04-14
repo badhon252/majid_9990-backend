@@ -1,0 +1,73 @@
+{
+      "info": {
+            "name": "Authentication API",
+            "description": "Postman collection for authentication APIs including signup, login, forgot password, and change password.",
+            "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+      },
+      "item": [
+            {
+                  "name": "Signup",
+                  "request": {
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                              "mode": "raw",
+                              "raw": "{\n    \"email\": \"user@example.com\",\n    \"password\": \"yourpassword\"\n}"
+                        },
+                        "url": {
+                              "raw": "{{base_url}}/signup",
+                              "host": ["{{base_url}}"],
+                              "path": ["signup"]
+                        }
+                  }
+            },
+            {
+                  "name": "Login",
+                  "request": {
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                              "mode": "raw",
+                              "raw": "{\n    \"email\": \"user@example.com\",\n    \"password\": \"yourpassword\"\n}"
+                        },
+                        "url": {
+                              "raw": "{{base_url}}/login",
+                              "host": ["{{base_url}}"],
+                              "path": ["login"]
+                        }
+                  }
+            },
+            {
+                  "name": "Forgot Password",
+                  "request": {
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                              "mode": "raw",
+                              "raw": "{\n    \"email\": \"user@example.com\"\n}"
+                        },
+                        "url": {
+                              "raw": "{{base_url}}/forgot-password",
+                              "host": ["{{base_url}}"],
+                              "path": ["forgot-password"]
+                        }
+                  }
+            },
+            {
+                  "name": "Change Password",
+                  "request": {
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                              "mode": "raw",
+                              "raw": "{\n    \"email\": \"user@example.com\",\n    \"oldPassword\": \"youroldpassword\",\n    \"newPassword\": \"yournewpassword\"\n}"
+                        },
+                        "url": {
+                              "raw": "{{base_url}}/change-password",
+                              "host": ["{{base_url}}"],
+                              "path": ["change-password"]
+                        }
+                  }
+            }
+      ]
+}
