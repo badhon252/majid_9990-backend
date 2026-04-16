@@ -17,4 +17,5 @@ export interface ISubscription {
       billingModel: string;
       features: string[];
       discount?: IDiscountTier[];
+      isFree: boolean;
 }
