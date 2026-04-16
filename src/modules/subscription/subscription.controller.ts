@@ -3,8 +3,8 @@ import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
 import subscriptionService from './subscription.service';
 
-const creteSubscription = catchAsync(async (req, res) => {
-      const result = await subscriptionService.creteSubscription(req.body);
+const createSubscription = catchAsync(async (req, res) => {
+      const result = await subscriptionService.createSubscription(req.body);
 
       sendResponse(res, {
             statusCode: StatusCodes.OK,
@@ -15,7 +15,7 @@ const creteSubscription = catchAsync(async (req, res) => {
 });
 
 const subscriptionController = {
-      creteSubscription,
+      createSubscription,
 };
 
 export default subscriptionController;

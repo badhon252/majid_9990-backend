@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import authRouter from '../modules/auth/auth.router';
 import deviceCheckRoutes from '../modules/deviceCheck/dhru.routes';
+import subscriptionRouter from '../modules/subscription/subscription.router';
 import userRoutes from '../modules/user/user.router';
 
 const router = Router();
@@ -17,6 +18,10 @@ const moduleRoutes = [
       {
             path: '/auth',
             route: authRouter,
+      },
+      {
+            path: '/subscription',
+            route: subscriptionRouter,
       },
 ];
 

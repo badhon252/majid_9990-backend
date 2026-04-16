@@ -64,6 +64,10 @@ const SubscriptionSchema = new Schema<ISubscription>(
                   type: [DiscountTierSchema],
                   default: [],
             },
+            isFree: {
+                  type: Boolean,
+                  default: false,
+            },
       },
       {
             timestamps: true,
