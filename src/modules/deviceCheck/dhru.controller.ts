@@ -1,5 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { dhruService } from './dhru.service';
+import ScanInfo from './scanInfo.model';
+import { buildStructuredScanInfo } from './scanInfo.transformer';
 
 const DEFAULT_SERVICE_ID = Number(process.env.DHRU_SERVICE_ID ?? 6);
 const ENABLE_SERVICE_FALLBACK = String(process.env.IMEI_ENABLE_SERVICE_FALLBACK ?? 'false').toLowerCase() === 'true';
@@ -151,6 +153,8 @@ export const checkImeiFromDhru = async (req: Request, res: Response, next: NextF
                   requestedServiceId
             );
 
+            let providerPayload: any = null;
+
             // 1) Handle provider error first
             if (placeOrderResponse?.ERROR) {
                   const providerErrorMsg = getProviderErrorMessage(placeOrderResponse);
@@ -167,38 +171,50 @@ export const checkImeiFromDhru = async (req: Request, res: Response, next: NextF
             const orderId = extractOrderId(placeOrderResponse);
 
             if (!orderId && isDirectFinalResult(placeOrderResponse)) {
-                  return res.status(200).json({
-                        success: true,
-                        message: `IMEI check completed (${dhruService.getProvider()})`,
-                        data: placeOrderResponse,
-                  });
+                  providerPayload = placeOrderResponse;
             }
 
-            if (!orderId) {
-                  return res.status(500).json({
-                        success: false,
-                        message: 'Order was accepted but order id not found in provider response',
-                        data: placeOrderResponse,
-                  });
+            if (!providerPayload) {
+                  if (!orderId) {
+                        return res.status(500).json({
+                              success: false,
+                              message: 'Order was accepted but order id not found in provider response',
+                              data: placeOrderResponse,
+                        });
+                  }
+
+                  const polledResult = await pollImeiOrderResult(orderId);
+
+                  if ('error' in polledResult) {
+                        return res.status(400).json({
+                              success: false,
+                              message:
+                                    polledResult.error.ERROR?.[0]?.FULL_DESCRIPTION ||
+                                    polledResult.error.ERROR?.[0]?.MESSAGE ||
+                                    'Provider returned an error while fetching the result',
+                              data: polledResult.error,
+                        });
+                  }
+
+                  providerPayload = polledResult.result;
             }
 
-            const polledResult = await pollImeiOrderResult(orderId);
+            const structuredInfo = await buildStructuredScanInfo(String(imei), providerPayload ?? {});
 
-            if ('error' in polledResult) {
-                  return res.status(400).json({
-                        success: false,
-                        message:
-                              polledResult.error.ERROR?.[0]?.FULL_DESCRIPTION ||
-                              polledResult.error.ERROR?.[0]?.MESSAGE ||
-                              'Provider returned an error while fetching the result',
-                        data: polledResult.error,
-                  });
-            }
+            await ScanInfo.findOneAndUpdate({ imei: String(imei) }, structuredInfo, {
+                  upsert: true,
+                  new: true,
+                  runValidators: true,
+                  setDefaultsOnInsert: true,
+            });
 
             return res.status(200).json({
                   success: true,
-                  message: 'IMEI check completed',
-                  data: polledResult.result,
+                  message: `IMEI check completed (${dhruService.getProvider()})`,
+                  data: {
+                        ...structuredInfo,
+                        providerData: providerPayload,
+                  },
             });
       } catch (error) {
             next(error);
