@@ -29,6 +29,7 @@
             "nodemailer": "^7.0.3",
             "prettier": "^3.6.2",
             "qs": "^6.15.1",
+            "stripe": "^22.1.0",
             "zod": "^3.25.64"
       },
       "devDependencies": {
