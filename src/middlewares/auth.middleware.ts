@@ -9,7 +9,7 @@ export const protect = async (req: Request, res: Response, next: NextFunction) =
       if (!token) throw new AppError('You are not authorized', StatusCodes.UNAUTHORIZED);
 
       try {
-            const decoded = (await jwt.verify(token, process.env.JWT_ACCESS_SECRET!)) as JwtPayload;
+            const decoded = (await jwt.verify(token, process.env.JWT_SECRET!)) as JwtPayload;
             // console.log(decoded)
             const user = await User.findById(decoded._id);
             if (user && (await User.isOTPVerified(user._id))) {
