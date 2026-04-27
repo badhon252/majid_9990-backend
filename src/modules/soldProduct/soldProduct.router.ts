@@ -13,4 +13,6 @@ router.put('/update/:id', protect, upload.single('image'), soldProductController
 
 router.delete('/delete/:id', protect, soldProductController.deleteSoldProduct);
 
+router.get('/next-due-dates', protect, soldProductController.getNextThreeDueDates);
+
 export default router;

@@ -57,9 +57,23 @@ const deleteSoldProduct = catchAsync(async (req, res) => {
       });
 });
 
+const getNextThreeDueDates = catchAsync(async (req, res) => {
+      const userId = req.user.id; // shopkeeperId based on auth
+
+      const result = await soldProductService.getNextThreeDueDates(userId);
+
+      sendResponse(res, {
+            statusCode: StatusCodes.OK,
+            success: true,
+            message: 'Next 3 due dates retrieved successfully',
+            data: result,
+      });
+});
+
 export const soldProductController = {
       createSoldProduct,
       getMySoldProducts,
       updateSoldProduct,
       deleteSoldProduct,
+      getNextThreeDueDates,
 };

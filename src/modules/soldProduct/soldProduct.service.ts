@@ -54,9 +54,16 @@ const deleteSoldProduct = async (id: string, shopkeeperId: string) => {
       return null;
 };
 
+const getNextThreeDueDates = async (shopkeeperId: string) => {
+      return await SoldProductModel.find({ shopkeeperId })
+            .sort({ dueDate: 1 }) // Sort by nearest due date
+            .limit(3); // Only top 3
+};
+
 export const soldProductService = {
       createSoldProduct,
       getMySoldProducts,
       updateSoldProduct,
       deleteSoldProduct,
+      getNextThreeDueDates,
 };
