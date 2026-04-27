@@ -3,7 +3,7 @@ import config from '../../config/config';
 import AppError from '../../errors/AppError';
 import { Payment } from './payment.model';
 
-let stripeClient: Stripe | null = null;
+let stripeClient: InstanceType<typeof Stripe> | null = null;
 
 const getStripeClient = () => {
       if (stripeClient) return stripeClient;

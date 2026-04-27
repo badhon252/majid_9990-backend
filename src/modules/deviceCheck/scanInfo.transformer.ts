@@ -7,9 +7,9 @@ type ProviderPayload = Record<string, any>;
 
 const htmlToText = (input: string) =>
       input
-            .replaceAll(/<br\s*\/?>/gi, '\n')
-            .replaceAll(/<[^>]*>/g, '')
-            .replaceAll(/&nbsp;/gi, ' ')
+            .replace(/<br\s*\/?>/gi, '\n')
+            .replace(/<[^>]*>/g, '')
+            .replace(/&nbsp;/gi, ' ')
             .trim();
 
 const extractTextBlock = (providerData: ProviderPayload): string => {
@@ -32,7 +32,7 @@ const toNumber = (value: string | null, fallback: number) => {
             return fallback;
       }
 
-      const parsed = Number(String(value).replaceAll(/[^\d.]/g, ''));
+      const parsed = Number(String(value).replace(/[^\d.]/g, ''));
       return Number.isFinite(parsed) ? parsed : fallback;
 };
 
