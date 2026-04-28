@@ -115,3 +115,60 @@ export const getAllNotificationByUser = catchAsync(async (req, res) => {
             data: notifications,    
       });
 });
+
+export const getAllNotificationByAdmin = catchAsync(async (req, res) => {
+      const page = Number(req.query.page) || 1;
+      const limit = Number(req.query.limit) || 10;
+      const skip = (page - 1) * limit;
+
+      const total = await Notification.countDocuments();
+
+      const notifications = await Notification.find()
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit)
+            .lean();
+
+      sendResponse(res, {
+            statusCode: StatusCodes.OK,
+            success: true,
+            message: 'Admin notifications fetched successfully',
+            meta: {
+                  page,
+                  limit,
+                  totalPage: Math.ceil(total / limit),
+                  total,
+            },
+            data: notifications,    
+      });
+});
+
+export const getSingleNotification = catchAsync(async (req, res) => {
+      const notification = await Notification.findById(req.params.id);
+
+      sendResponse(res, {
+            statusCode: StatusCodes.OK,
+            success: true,
+            message: 'Notification retrieved successfully',
+            data: notification,
+      });
+});
+
+
+export const markAsReadSingleNotification = catchAsync(async (req, res) => {
+      const { id } = req.params;
+      const notification = await Notification.findById(id);
+
+      if (!notification) {
+            throw new AppError('Notification not found', StatusCodes.NOT_FOUND);
+      }
+
+      await Notification.findByIdAndUpdate(id, { isViewed: true });
+
+      sendResponse(res, {
+            statusCode: StatusCodes.OK,
+            success: true,
+            message: 'Notification marked as read successfully',
+            data: notification,
+      });
+})
