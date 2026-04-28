@@ -301,11 +301,13 @@ export const calculateRisk = (signals: RiskSignals): RiskResult => {
 };
 
 export const getDeviceChecks = async (imei: string): Promise<DeviceChecksResponse> => {
-      const rawResults: Record<string, ServiceCallResult> = {};
-
-      for (const [serviceKey, serviceId] of Object.entries(IMPORTANT_SERVICES)) {
-            rawResults[serviceKey] = await callService(imei, serviceId);
-      }
+      const rawResults = Object.fromEntries(
+            await Promise.all(
+                  Object.entries(IMPORTANT_SERVICES).map(
+                        async ([serviceKey, serviceId]) => [serviceKey, await callService(imei, serviceId)] as const
+                  )
+            )
+      ) as Record<string, ServiceCallResult>;
 
       const signals = buildSignals(rawResults);
 

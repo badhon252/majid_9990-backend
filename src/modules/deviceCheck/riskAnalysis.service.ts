@@ -1,6 +1,6 @@
-import { DeviceChecksResponse, RiskResult } from './riskAnalysis.interface';
+import { DeviceAnalysisResponse, DeviceChecksResponse, RiskResult, ImeiCheckSection } from './riskAnalysis.interface';
 import { calculateRisk, getDeviceChecks } from './riskAnalysis.utils';
-
+import { ImeiCheckFailure, runImeiCheck } from './deviceCheck.helpers';
 
 // Response includes:
 
@@ -21,6 +21,29 @@ const analyzeRisk = async (imei: string): Promise<DeviceChecksResponse & RiskRes
       };
 };
 
+const analyzeDeviceAnalysis = async (
+      imei: string,
+      serviceId: number
+): Promise<DeviceAnalysisResponse | ImeiCheckFailure> => {
+      const [checkResult, risk] = await Promise.all([runImeiCheck(imei, serviceId), analyzeRisk(imei)]);
+
+      if (!checkResult.ok) {
+            return checkResult;
+      }
+
+      return {
+            imei,
+            check: {
+                  serviceId: checkResult.serviceId,
+                  provider: checkResult.provider,
+                  structured: checkResult.structured as ImeiCheckSection['structured'],
+                  providerData: checkResult.providerData,
+            },
+            risk,
+      };
+};
+
 export const riskAnalysisService = {
       analyzeRisk,
+      analyzeDeviceAnalysis,
 };

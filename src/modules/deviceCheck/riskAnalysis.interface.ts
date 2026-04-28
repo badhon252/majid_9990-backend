@@ -35,3 +35,16 @@ export type DeviceChecksResponse = {
       signals: RiskSignals;
       raw: RawServiceResults;
 };
+
+export type ImeiCheckSection = {
+      serviceId: number;
+      provider: string;
+      structured: Record<string, unknown>;
+      providerData: unknown;
+};
+
+export type DeviceAnalysisResponse = {
+      imei: string;
+      check: ImeiCheckSection;
+      risk: RiskResult & DeviceChecksResponse;
+};
