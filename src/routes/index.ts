@@ -10,6 +10,7 @@ import dashboardRouter from '../modules/dashboard/dashboard.router';
 import soldProductRoutes from '../modules/soldProduct/soldProduct.router';
 import repairRequestRouter from '../modules/repairRequest/repairRequest.router';
 import announcementRouter from '../modules/announcement/announcement.router';
+import reviewRoutes from '../modules/review/review.router'
 
 const router = Router();
 
@@ -61,6 +62,10 @@ const moduleRoutes = [
       {
             path: '/announcements',
             route: announcementRouter,
+      },
+      {
+            path: '/review',
+            route: reviewRoutes,
       },
 ];
 

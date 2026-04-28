@@ -68,6 +68,22 @@
                               "path": ["change-password"]
                         }
                   }
+            },
+            {
+                  "name": "Unified Device Analysis",
+                  "request": {
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                              "mode": "raw",
+                              "raw": "{\n    \"imei\": \"123456789012345\",\n    \"serviceId\": 6\n}"
+                        },
+                        "url": {
+                              "raw": "{{base_url}}/imei/device-analysis",
+                              "host": ["{{base_url}}"],
+                              "path": ["imei", "device-analysis"]
+                        }
+                  }
             }
       ]
 }
