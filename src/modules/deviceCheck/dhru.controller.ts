@@ -5,6 +5,10 @@ import { getExistingScanInfoByImei, isValidImei, resolveServiceId, runImeiCheck 
 export const checkImeiFromDhru = async (req: Request, res: Response, next: NextFunction) => {
       try {
             const imei = String(req.body?.imei ?? '').trim();
+            const shouldGenerateFresh =
+                  String(req.body?.genarate ?? req.body?.generate ?? '')
+                        .trim()
+                        .toLowerCase() === 'new';
 
             if (!imei || !isValidImei(imei)) {
                   return res.status(400).json({
@@ -13,7 +17,7 @@ export const checkImeiFromDhru = async (req: Request, res: Response, next: NextF
                   });
             }
 
-            const existingScanInfo = await getExistingScanInfoByImei(imei);
+            const existingScanInfo = shouldGenerateFresh ? null : await getExistingScanInfoByImei(imei);
 
             if (existingScanInfo) {
                   return res.status(200).json({
@@ -47,7 +51,9 @@ export const checkImeiFromDhru = async (req: Request, res: Response, next: NextF
 
             return res.status(200).json({
                   success: true,
-                  message: `IMEI check completed (${result.provider})`,
+                  message: shouldGenerateFresh
+                        ? `IMEI check regenerated (${result.provider})`
+                        : `IMEI check completed (${result.provider})`,
                   data: {
                         ...result.structured,
                         providerData: result.providerData,
