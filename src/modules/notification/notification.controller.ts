@@ -5,12 +5,21 @@ import Notification from "./notification.model";
 import AppError from "../../errors/AppError";
 
 export const markAllAsRead = catchAsync(async (req, res) => {
-      const result = await Notification.updateMany({ isViewed: false }, { isViewed: true });
+      const userId = req.user?.id || req.user?._id;
+
+      if (!userId) {
+            throw new AppError('Unauthorized request', StatusCodes.UNAUTHORIZED);
+      }
+
+      const result = await Notification.updateMany(
+            { to: userId, isViewed: false }, 
+            { isViewed: true }
+      );
 
       sendResponse(res, {
             statusCode: StatusCodes.OK,
             success: true,
-            message: 'All notifications marked as read successfully',
+            message: 'All your notifications marked as read successfully',
             data: result,
       });
 });
@@ -144,7 +153,23 @@ export const getAllNotificationByAdmin = catchAsync(async (req, res) => {
 });
 
 export const getSingleNotification = catchAsync(async (req, res) => {
-      const notification = await Notification.findById(req.params.id);
+      const { id } = req.params;
+      const userId = req.user?.id || req.user?._id;
+
+      if (!userId) {
+            throw new AppError('Unauthorized request', StatusCodes.UNAUTHORIZED);
+      }
+
+      const notification = await Notification.findById(id);
+
+      if (!notification) {
+            throw new AppError('Notification not found', StatusCodes.NOT_FOUND);
+      }
+
+      // Check if notification belongs to the user
+      if (notification.to.toString() !== userId.toString()) {
+            throw new AppError('You are not authorized to view this notification', StatusCodes.FORBIDDEN);
+      }
 
       sendResponse(res, {
             statusCode: StatusCodes.OK,
@@ -157,10 +182,21 @@ export const getSingleNotification = catchAsync(async (req, res) => {
 
 export const markAsReadSingleNotification = catchAsync(async (req, res) => {
       const { id } = req.params;
+      const userId = req.user?.id || req.user?._id;
+
+      if (!userId) {
+            throw new AppError('Unauthorized request', StatusCodes.UNAUTHORIZED);
+      }
+
       const notification = await Notification.findById(id);
 
       if (!notification) {
             throw new AppError('Notification not found', StatusCodes.NOT_FOUND);
+      }
+
+      // Check if notification belongs to the user
+      if (notification.to.toString() !== userId.toString()) {
+            throw new AppError('You are not authorized to mark this notification as read', StatusCodes.FORBIDDEN);
       }
 
       await Notification.findByIdAndUpdate(id, { isViewed: true });
@@ -171,4 +207,4 @@ export const markAsReadSingleNotification = catchAsync(async (req, res) => {
             message: 'Notification marked as read successfully',
             data: notification,
       });
-})
+});

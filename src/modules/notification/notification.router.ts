@@ -8,10 +8,10 @@ router.get('/', protect, getAllNotifications);
 router.get("/shopkeeper", protect, getShopkeeperAllNotifications);
 router.get("/user", protect, getAllNotificationByUser);
 router.get("/admin", protect, getAllNotificationByAdmin);
-router.get('/:id',  getSingleNotification);
-router.patch('/read/:id',  markAsReadSingleNotification);
+router.get('/:id', protect, getSingleNotification);
+router.patch('/read/:id', protect, markAsReadSingleNotification);
 
-router.patch('/read/all', markAllAsRead);
+router.patch('/read/all', protect, markAllAsRead);
 
 
 const notificationRouter = router;

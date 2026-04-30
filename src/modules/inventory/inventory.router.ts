@@ -9,13 +9,13 @@ router.post('/create', protect, upload.single('image'), inventoryController.crea
 
 router.get('/', protect, inventoryController.getAllInventory);
 
+router.get('/my-inventory', protect, inventoryController.getMyInventory);
+
 router.get('/:id', protect, inventoryController.getSingleInventory);
 
 router.put('/:id', protect, upload.single('image'), inventoryController.updateInventory);
 
 router.delete('/:id', protect, inventoryController.deleteInventory);
-
-router.get('/my-inventory', protect, inventoryController.getMyInventory);
 
 //ideally admin only
 router.get('/user/:userId', protect, inventoryController.getInventoryByUserId);
