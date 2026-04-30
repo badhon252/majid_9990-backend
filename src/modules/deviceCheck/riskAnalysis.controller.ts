@@ -2,13 +2,28 @@ import AppError from '../../errors/AppError';
 import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
 import { riskAnalysisService } from './riskAnalysis.service';
-import { isValidImei, resolveServiceId, validateServiceId } from './deviceCheck.helpers';
+import { getExistingScanInfoByImei, isValidImei, resolveServiceId, validateServiceId } from './deviceCheck.helpers';
 
 export const getRiskAnalysis = catchAsync(async (req, res) => {
       const imei = String(req.body?.imei ?? '').trim();
 
       if (!isValidImei(imei)) {
             throw new AppError('Valid 15-digit IMEI is required', 400);
+      }
+
+      const existingScanInfo = await getExistingScanInfoByImei(imei);
+
+      if (existingScanInfo) {
+            sendResponse(res, {
+                  statusCode: 200,
+                  success: true,
+                  message: 'Risk analysis fetched from database',
+                  data: {
+                        ...existingScanInfo,
+                        oldGenerated: true,
+                  },
+            });
+            return;
       }
 
       const result = await riskAnalysisService.analyzeRisk(imei);
@@ -24,13 +39,13 @@ export const getRiskAnalysis = catchAsync(async (req, res) => {
                   issues: result.issues,
                   signals: result.signals,
                   raw: result.raw,
+                  oldGenerated: false,
             },
       });
 });
 
 export const getDeviceAnalysis = catchAsync(async (req, res) => {
       const imei = String(req.body?.imei ?? '').trim();
-      const serviceId = resolveServiceId(req.body?.serviceId);
 
       if (!isValidImei(imei)) {
             return res.status(400).json({
@@ -38,6 +53,23 @@ export const getDeviceAnalysis = catchAsync(async (req, res) => {
                   message: 'Valid 15-digit IMEI is required',
             });
       }
+
+      const existingScanInfo = await getExistingScanInfoByImei(imei);
+
+      if (existingScanInfo) {
+            sendResponse(res, {
+                  statusCode: 200,
+                  success: true,
+                  message: 'Device analysis fetched from database',
+                  data: {
+                        ...existingScanInfo,
+                        oldGenerated: true,
+                  },
+            });
+            return;
+      }
+
+      const serviceId = resolveServiceId(req.body?.serviceId);
 
       if (!validateServiceId(serviceId)) {
             return res.status(400).json({
@@ -60,6 +92,9 @@ export const getDeviceAnalysis = catchAsync(async (req, res) => {
             statusCode: 200,
             success: true,
             message: 'Device analysis generated',
-            data: result,
+            data: {
+                  ...result,
+                  oldGenerated: false,
+            },
       });
 });
