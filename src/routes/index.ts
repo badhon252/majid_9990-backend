@@ -10,7 +10,8 @@ import dashboardRouter from '../modules/dashboard/dashboard.router';
 import soldProductRoutes from '../modules/soldProduct/soldProduct.router';
 import repairRequestRouter from '../modules/repairRequest/repairRequest.router';
 import announcementRouter from '../modules/announcement/announcement.router';
-import reviewRoutes from '../modules/review/review.router'
+import reviewRoutes from '../modules/review/review.router';
+import barcodeRouter from '../modules/barcode/barcode.router';
 
 const router = Router();
 
@@ -67,8 +68,11 @@ const moduleRoutes = [
             path: '/review',
             route: reviewRoutes,
       },
+      {
+            path: '/barcode',
+            route: barcodeRouter,
+      },
 ];
-
 moduleRoutes.forEach((route) => router.use(route.path, route.route));
 
 export default router;
