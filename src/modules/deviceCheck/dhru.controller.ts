@@ -1,18 +1,36 @@
 import { Request, Response, NextFunction } from 'express';
 import { dhruService } from './dhru.service';
-import { isValidImei, resolveServiceId, runImeiCheck } from './deviceCheck.helpers';
+import { getExistingScanInfoByImei, isValidImei, resolveServiceId, runImeiCheck } from './deviceCheck.helpers';
 
 export const checkImeiFromDhru = async (req: Request, res: Response, next: NextFunction) => {
       try {
-            const { imei } = req.body;
-            const requestedServiceId = resolveServiceId(req.body?.serviceId);
+            const imei = String(req.body?.imei ?? '').trim();
+            const shouldGenerateFresh =
+                  String(req.body?.genarate ?? req.body?.generate ?? '')
+                        .trim()
+                        .toLowerCase() === 'new';
 
-            if (!imei || !isValidImei(String(imei))) {
+            if (!imei || !isValidImei(imei)) {
                   return res.status(400).json({
                         success: false,
                         message: 'Valid 15-digit imei is required',
                   });
             }
+
+            const existingScanInfo = shouldGenerateFresh ? null : await getExistingScanInfoByImei(imei);
+
+            if (existingScanInfo) {
+                  return res.status(200).json({
+                        success: true,
+                        message: 'IMEI data fetched from database',
+                        data: {
+                              ...existingScanInfo,
+                              oldGenerated: true,
+                        },
+                  });
+            }
+
+            const requestedServiceId = resolveServiceId(req.body?.serviceId);
 
             if (!Number.isFinite(requestedServiceId) || requestedServiceId <= 0) {
                   return res.status(400).json({
@@ -33,10 +51,13 @@ export const checkImeiFromDhru = async (req: Request, res: Response, next: NextF
 
             return res.status(200).json({
                   success: true,
-                  message: `IMEI check completed (${result.provider})`,
+                  message: shouldGenerateFresh
+                        ? `IMEI check regenerated (${result.provider})`
+                        : `IMEI check completed (${result.provider})`,
                   data: {
                         ...result.structured,
                         providerData: result.providerData,
+                        oldGenerated: false,
                   },
             });
       } catch (error) {

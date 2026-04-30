@@ -1,0 +1,361 @@
+{
+  "info": {
+    "_postman_id": "barcode-search-collection",
+    "name": "Barcode Search API",
+    "description": "EAN-Search Barcode Lookup Integration Collection",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Search by Barcode",
+      "item": [
+        {
+          "name": "Search by EAN Code",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/api/v1/barcode/5901234123457",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "v1", "barcode", "5901234123457"]
+            },
+            "description": "Search for a product using an EAN/UPC/GTIN barcode code. Returns product details including name, brand, category, image, etc."
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:5000/api/v1/barcode/5901234123457",
+                  "protocol": "http",
+                  "host": ["localhost"],
+                  "port": "5000",
+                  "path": ["api", "v1", "barcode", "5901234123457"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"statusCode\": 200,\n  \"success\": true,\n  \"message\": \"Product found successfully\",\n  \"data\": {\n    \"name\": \"Coca-Cola 1.5L\",\n    \"brand\": \"The Coca-Cola Company\",\n    \"category\": \"Beverages\",\n    \"description\": \"Coca-Cola Classic 1.5 liters\",\n    \"barcode\": \"5901234123457\",\n    \"image\": \"https://example.com/image.jpg\",\n    \"rawData\": {\n      \"ean\": \"5901234123457\",\n      \"title\": \"Coca-Cola 1.5L\",\n      \"brand\": \"The Coca-Cola Company\",\n      \"category\": \"Beverages\"\n    }\n  }\n}"
+            },
+            {
+              "name": "Product Not Found",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:5000/api/v1/barcode/9999999999999",
+                  "protocol": "http",
+                  "host": ["localhost"],
+                  "port": "5000",
+                  "path": ["api", "v1", "barcode", "9999999999999"]
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"statusCode\": 404,\n  \"success\": false,\n  \"message\": \"Product with barcode 9999999999999 not found\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Search by UPC Code",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5000/api/v1/barcode/012000008449",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "v1", "barcode", "012000008449"]
+            },
+            "description": "Search for a product using a UPC code. UPC codes are typically 12 digits."
+          }
+        },
+        {
+          "name": "Search by GTIN Code",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5000/api/v1/barcode/4006381333931",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "v1", "barcode", "4006381333931"]
+            },
+            "description": "Search for a product using a GTIN code. GTIN can be 12, 13, or 14 digits."
+          }
+        },
+        {
+          "name": "Search by ISBN",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5000/api/v1/barcode/9780451524935",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "v1", "barcode", "9780451524935"]
+            },
+            "description": "Search for a book using an ISBN code."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Search by Name",
+      "item": [
+        {
+          "name": "Search by Product Name",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5000/api/v1/barcode/search?query=Coca-Cola",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "v1", "barcode", "search"],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "Coca-Cola"
+                }
+              ]
+            },
+            "description": "Search for products by name/keyword. Returns array of matching products."
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:5000/api/v1/barcode/search?query=Coca-Cola",
+                  "protocol": "http",
+                  "host": ["localhost"],
+                  "port": "5000",
+                  "path": ["api", "v1", "barcode", "search"],
+                  "query": [
+                    {
+                      "key": "query",
+                      "value": "Coca-Cola"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"statusCode\": 200,\n  \"success\": true,\n  \"message\": \"Found 3 product(s)\",\n  \"data\": [\n    {\n      \"name\": \"Coca-Cola Classic 330ml\",\n      \"brand\": \"The Coca-Cola Company\",\n      \"category\": \"Beverages\",\n      \"barcode\": \"5449000050127\",\n      \"image\": \"https://example.com/coke-330ml.jpg\"\n    },\n    {\n      \"name\": \"Coca-Cola 1.5L\",\n      \"brand\": \"The Coca-Cola Company\",\n      \"category\": \"Beverages\",\n      \"barcode\": \"5901234123457\",\n      \"image\": \"https://example.com/coke-1.5l.jpg\"\n    },\n    {\n      \"name\": \"Diet Coca-Cola 330ml\",\n      \"brand\": \"The Coca-Cola Company\",\n      \"category\": \"Beverages\",\n      \"barcode\": \"5449000050127\",\n      \"image\": \"https://example.com/diet-coke-330ml.jpg\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Search by Brand",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5000/api/v1/barcode/search?query=Apple",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "v1", "barcode", "search"],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "Apple"
+                }
+              ]
+            },
+            "description": "Search for products by brand name"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Fallback Search",
+      "item": [
+        {
+          "name": "Fallback REST Search",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5000/api/v1/barcode/fallback/9780451524935",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "v1", "barcode", "fallback", "9780451524935"]
+            },
+            "description": "Use fallback REST API (UPCItemDB) for barcode search when primary API fails. Useful as a manual override or debugging endpoint."
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:5000/api/v1/barcode/fallback/012000008449",
+                  "protocol": "http",
+                  "host": ["localhost"],
+                  "port": "5000",
+                  "path": ["api", "v1", "barcode", "fallback", "012000008449"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"statusCode\": 200,\n  \"success\": true,\n  \"message\": \"Product found via fallback API\",\n  \"data\": {\n    \"name\": \"Coca-Cola 355ml\",\n    \"brand\": \"The Coca-Cola Company\",\n    \"category\": \"Beverages\",\n    \"barcode\": \"012000008449\",\n    \"image\": \"https://example.com/coke-355ml.jpg\"\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Cache Management (Protected)",
+      "item": [
+        {
+          "name": "Get Cache Statistics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer YOUR_AUTH_TOKEN",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/api/v1/barcode/stats/cache",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "v1", "barcode", "stats", "cache"]
+            },
+            "description": "Get cache statistics including size, TTL, and cache entries. Requires authentication."
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer YOUR_AUTH_TOKEN",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:5000/api/v1/barcode/stats/cache",
+                  "protocol": "http",
+                  "host": ["localhost"],
+                  "port": "5000",
+                  "path": ["api", "v1", "barcode", "stats", "cache"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"statusCode\": 200,\n  \"success\": true,\n  \"message\": \"Cache statistics retrieved\",\n  \"data\": {\n    \"size\": 5,\n    \"ttl\": 86400000,\n    \"entries\": [\n      {\n        \"key\": \"barcode_5901234123457\",\n        \"age\": 3600000\n      },\n      {\n        \"key\": \"name_coca-cola\",\n        \"age\": 7200000\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Clear Cache",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer YOUR_AUTH_TOKEN",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/api/v1/barcode/cache/clear",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "v1", "barcode", "cache", "clear"]
+            },
+            "description": "Clear all cached barcode search results. Requires authentication."
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer YOUR_AUTH_TOKEN",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:5000/api/v1/barcode/cache/clear",
+                  "protocol": "http",
+                  "host": ["localhost"],
+                  "port": "5000",
+                  "path": ["api", "v1", "barcode", "cache", "clear"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"statusCode\": 200,\n  \"success\": true,\n  \"message\": \"Cache cleared successfully\"\n}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

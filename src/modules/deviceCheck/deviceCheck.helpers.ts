@@ -130,6 +130,10 @@ export const resolveServiceId = (serviceId: unknown) => Number(serviceId ?? DEFA
 
 export const validateServiceId = (serviceId: number) => Number.isFinite(serviceId) && serviceId > 0;
 
+export const getExistingScanInfoByImei = async (imei: string) => {
+      return ScanInfo.findOne({ imei }).lean();
+};
+
 export type ImeiCheckFailure = {
       ok: false;
       statusCode: number;
