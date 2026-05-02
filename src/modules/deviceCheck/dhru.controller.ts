@@ -2,6 +2,8 @@ import { Request, Response, NextFunction } from 'express';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import XLSX from 'xlsx';
+import { ImeiServiceCatalog } from './imeiService.model';
+import { curatedDhruServices, normalizeServiceName } from './dhru.services.catalog';
 import { dhruService } from './dhru.service';
 import { getExistingScanInfoByImei, isValidImei, resolveServiceId, runImeiCheck } from './deviceCheck.helpers';
 
@@ -49,7 +51,116 @@ const safeDeleteFile = async (filePath?: string) => {
       }
 };
 
-const processSingleImeiCheck = async (imei: string, serviceId: number, shouldGenerateFresh: boolean): Promise<SingleImeiCheckResult> => {
+type UpstreamService = {
+      serviceId: number;
+      name: string;
+      price?: string;
+};
+
+const extractUpstreamServices = (response: unknown): UpstreamService[] => {
+      const payload = response as Record<string, any>;
+      const candidates =
+            payload?.data?.['Service List'] ??
+            payload?.data?.services ??
+            payload?.data?.SERVICE_LIST ??
+            payload?.data?.['service list'] ??
+            payload?.services ??
+            payload?.SERVICE_LIST ??
+            payload?.['Service List'] ??
+            payload;
+
+      if (!Array.isArray(candidates)) {
+            return [];
+      }
+
+      return candidates
+            .map((item: any) => ({
+                  serviceId: Number(item?.service ?? item?.serviceId ?? item?.serviceid ?? item?.id),
+                  name: String(item?.name ?? item?.serviceName ?? item?.SERVICE_NAME ?? '').trim(),
+                  price: String(item?.price ?? item?.PRICE ?? '').trim(),
+            }))
+            .filter((item) => Number.isFinite(item.serviceId) && item.serviceId > 0 && item.name.length > 0);
+};
+
+const formatPriceLabel = (price: string) => (price.toUpperCase() === 'FREE' ? 'FREE' : `${price}$`);
+
+const groupByCategory = <T extends { category: string }>(items: T[]) => {
+      const groups = new Map<string, T[]>();
+
+      for (const item of items) {
+            const existing = groups.get(item.category) ?? [];
+            existing.push(item);
+            groups.set(item.category, existing);
+      }
+
+      return Array.from(groups.entries()).map(([category, services]) => ({ category, services }));
+};
+
+const syncCuratedServices = async (upstreamServices: UpstreamService[]) => {
+      const upstreamLookup = new Map<string, UpstreamService[]>();
+
+      for (const service of upstreamServices) {
+            const key = normalizeServiceName(service.name);
+            const existing = upstreamLookup.get(key) ?? [];
+            existing.push(service);
+            upstreamLookup.set(key, existing);
+      }
+
+      const catalogDocuments = curatedDhruServices.map((service) => {
+            const normalizedName = normalizeServiceName(service.name);
+            const matches = upstreamLookup.get(normalizedName) ?? [];
+            const serviceIds = Array.from(new Set(matches.map((item) => item.serviceId)));
+            const sourceNames = Array.from(new Set(matches.map((item) => item.name)));
+
+            return {
+                  category: service.category,
+                  name: service.name,
+                  normalizedName,
+                  price: service.price,
+                  currency: 'USD',
+                  isFree: service.price.toUpperCase() === 'FREE',
+                  serviceId: serviceIds[0] ?? null,
+                  serviceIds,
+                  sourceNames,
+            };
+      });
+
+      if (catalogDocuments.length) {
+            await ImeiServiceCatalog.bulkWrite(
+                  catalogDocuments.map((document) => ({
+                        updateOne: {
+                              filter: { normalizedName: document.normalizedName },
+                              update: { $set: document },
+                              upsert: true,
+                        },
+                  }))
+            );
+      }
+
+      return groupByCategory(
+            catalogDocuments.map((document) => ({
+                  ...document,
+                  priceLabel: formatPriceLabel(document.price),
+            }))
+      );
+};
+
+const readStoredServices = async () => {
+      const storedServices = await ImeiServiceCatalog.find().sort({ category: 1, name: 1 }).lean();
+
+      return groupByCategory(
+            storedServices.map((document) => ({
+                  ...document,
+                  priceLabel: formatPriceLabel(document.price),
+            }))
+      );
+};
+
+const processSingleImeiCheck = async (
+      imei: string,
+      serviceId: number,
+      shouldGenerateFresh: boolean
+): Promise<SingleImeiCheckResult> => {
       if (!imei || !isValidImei(imei)) {
             return {
                   ok: false,
@@ -92,7 +203,9 @@ const processSingleImeiCheck = async (imei: string, serviceId: number, shouldGen
 
       return {
             ok: true,
-            message: shouldGenerateFresh ? `IMEI check regenerated (${result.provider})` : `IMEI check completed (${result.provider})`,
+            message: shouldGenerateFresh
+                  ? `IMEI check regenerated (${result.provider})`
+                  : `IMEI check completed (${result.provider})`,
             data: {
                   ...result.structured,
                   providerData: result.providerData,
@@ -122,12 +235,15 @@ const extractImeisFromWorkbook = (filePath: string) => {
 
       const firstRow = rows[0].map((cell) => normalizeImei(cell).toLowerCase());
       const headerLooksLikeImeiColumn = firstRow.some((cell) => cell === 'imei' || cell.includes('imei'));
-      const imeiColumnIndex = headerLooksLikeImeiColumn ? Math.max(firstRow.findIndex((cell) => cell === 'imei' || cell.includes('imei')), 0) : 0;
+      const imeiColumnIndex = headerLooksLikeImeiColumn
+            ? Math.max(
+                    firstRow.findIndex((cell) => cell === 'imei' || cell.includes('imei')),
+                    0
+              )
+            : 0;
       const dataRows = headerLooksLikeImeiColumn ? rows.slice(1) : rows;
 
-      return dataRows
-            .map((row) => normalizeImei(row?.[imeiColumnIndex] ?? row?.[0]))
-            .filter((imei) => imei.length > 0);
+      return dataRows.map((row) => normalizeImei(row?.[imeiColumnIndex] ?? row?.[0])).filter((imei) => imei.length > 0);
 };
 
 export const checkImeiFromDhru = async (req: Request, res: Response, next: NextFunction) => {
@@ -161,7 +277,10 @@ export const checkImeiFromDhru = async (req: Request, res: Response, next: NextF
 
 export const checkImeisFromFile = async (req: Request, res: Response, next: NextFunction) => {
       const file = req.file;
-      const shouldGenerateFresh = String(req.body?.genarate ?? req.body?.generate ?? '').trim().toLowerCase() === 'new';
+      const shouldGenerateFresh =
+            String(req.body?.genarate ?? req.body?.generate ?? '')
+                  .trim()
+                  .toLowerCase() === 'new';
       const requestedServiceId = resolveServiceId(req.body?.serviceId);
 
       try {
@@ -181,7 +300,9 @@ export const checkImeisFromFile = async (req: Request, res: Response, next: Next
                   });
             }
 
-            const imeis = extractImeisFromWorkbook(file.path).map((imei) => normalizeImei(imei)).filter((imei) => imei.length > 0);
+            const imeis = extractImeisFromWorkbook(file.path)
+                  .map((imei) => normalizeImei(imei))
+                  .filter((imei) => imei.length > 0);
 
             if (!imeis.length) {
                   return res.status(400).json({
@@ -247,10 +368,31 @@ export const checkImeisFromFile = async (req: Request, res: Response, next: Next
       }
 };
 
-export const getServices = async (_req: Request, res: Response) => {
+export const syncServices = async (_req: Request, res: Response) => {
       const result = await dhruService.getImeiServices();
+      const upstreamServices = extractUpstreamServices(result);
+      const services = await syncCuratedServices(upstreamServices);
+
       return res.json({
             success: true,
-            data: result,
+            message: 'IMEI services synced successfully',
+            data: services,
+            meta: {
+                  totalServices: services.reduce((count, group) => count + group.services.length, 0),
+                  totalCategories: services.length,
+            },
+      });
+};
+
+export const getServices = async (_req: Request, res: Response) => {
+      const services = await readStoredServices();
+
+      return res.json({
+            success: true,
+            data: services,
+            meta: {
+                  totalServices: services.reduce((count, group) => count + group.services.length, 0),
+                  totalCategories: services.length,
+            },
       });
 };
