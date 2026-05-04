@@ -43,6 +43,18 @@ const createInventoryFromBarcode = catchAsync(async (req, res) => {
       });
 });
 
+const createInventoryFromBarcodeBulk = catchAsync(async (req, res) => {
+      const defaultUserId = String(req.body?.userId ?? req.user?._id ?? '').trim() || undefined;
+      const result = await inventoryService.createInventoryFromBarcodeBulk(req.file, defaultUserId);
+
+      sendResponse(res, {
+            statusCode: StatusCodes.CREATED,
+            success: true,
+            message: 'Bulk inventory created from barcode successfully',
+            data: result,
+      });
+});
+
 const getAllInventory = catchAsync(async (req, res) => {
       const result = await inventoryService.getAllInventory();
 
@@ -116,6 +128,7 @@ const getInventoryByUserId = catchAsync(async (req, res) => {
 export default {
       createInventory,
       createInventoryFromBarcode,
+      createInventoryFromBarcodeBulk,
       getAllInventory,
       getSingleInventory,
       updateInventory,

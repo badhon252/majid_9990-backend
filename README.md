@@ -42,3 +42,8 @@ The same `device-analysis` route is also available under `/api/v1/device/device-
 - `imei` is required and must be exactly 15 digits.
 - `serviceId` is optional and defaults to the current `DHRU_SERVICE_ID` behavior.
 - Existing `/check` and `/risk-analysis` response shapes remain unchanged.
+
+
+### Bulk Upload inventory from CSV
+post /create-from-barcode/bulk
+- Details: It accepts a CSV, XLS, or XLSX upload on the file field, reads the first worksheet, maps each row into the same payload shape used by createInventoryFromBarcode, and processes rows one by one. It supports header-based sheets with fields like code or barcode, userId, imeiNumber, purchasePrice, and currentState, and it also falls back to positional columns if there is no header row. The response returns a summary plus per-row success or failure details.
