@@ -20,7 +20,7 @@ const inventorySchema = new Schema<IInventory>(
                   type: Number,
             },
             productDetails: {
-                  type: Schema.Types.Mixed,
+                  type: String,
             },
             aiDescription: {
                   type: String,

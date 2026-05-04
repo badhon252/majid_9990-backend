@@ -7,7 +7,7 @@ export interface IInventory {
       imeiNumber: string;
       purchasePrice?: number;
       expectedPrice?: number;
-      productDetails?: Record<string, any>;
+      productDetails?: string;
       aiDescription?: string;
       image?: {
             public_id: string;
