@@ -1,4 +1,5 @@
 import AppError from '../../errors/AppError';
+import { Types } from 'mongoose';
 import { IBarcodeSearchResult } from '../barcode/barcode.interface';
 import barcodeService from '../barcode/barcode.service';
 import { getOpenAiInsight } from '../deviceCheck/scanInfo.transformer';
@@ -15,7 +16,10 @@ const parseOptionalNumber = (value: unknown) => {
 };
 
 const estimateBarcodeValue = (product: IBarcodeSearchResult) => {
-      const text = [product.name, product.brand, product.category, product.description].filter(Boolean).join(' ').toLowerCase();
+      const text = [product.name, product.brand, product.category, product.description]
+            .filter(Boolean)
+            .join(' ')
+            .toLowerCase();
 
       if (text.includes('iphone')) {
             return 920;
@@ -73,6 +77,12 @@ const createInventoryFromBarcode = async (
             throw new AppError('userId is required', 400);
       }
 
+      if (!Types.ObjectId.isValid(userId)) {
+            throw new AppError('Invalid userId', 400);
+      }
+
+      const userObjectId = new Types.ObjectId(userId);
+
       const barcodeResult = await barcodeService.searchByBarcode(cleanCode);
       const fallbackName = barcodeResult.brand ? `${barcodeResult.brand} ${barcodeResult.name}` : barcodeResult.name;
       const itemName = fallbackName?.trim() || 'Unknown Product';
@@ -94,7 +104,7 @@ const createInventoryFromBarcode = async (
             {
                   itemName,
                   imeiNumber,
-                  userId,
+                  userId: userObjectId,
                   purchasePrice,
                   expectedPrice,
                   currentState: normalizeCondition(payload.currentState),

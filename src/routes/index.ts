@@ -12,6 +12,7 @@ import repairRequestRouter from '../modules/repairRequest/repairRequest.router';
 import announcementRouter from '../modules/announcement/announcement.router';
 import reviewRoutes from '../modules/review/review.router';
 import barcodeRouter from '../modules/barcode/barcode.router';
+import bankDetailsRouter from '../modules/bankDetails/bankDetails.router';
 
 const router = Router();
 
@@ -71,6 +72,10 @@ const moduleRoutes = [
       {
             path: '/barcode',
             route: barcodeRouter,
+      },
+      {
+            path: '/bank-details',
+            route: bankDetailsRouter,
       },
 ];
 moduleRoutes.forEach((route) => router.use(route.path, route.route));

@@ -1,0 +1,132 @@
+{
+      "info": {
+            "name": "Bank Details API Collection",
+            "description": "Postman-ready requests for bank details CRUD and filters.",
+            "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+      },
+      "variable": [
+            {
+                  "key": "baseUrl",
+                  "value": "http://localhost:5000"
+            },
+            {
+                  "key": "token",
+                  "value": "PASTE_JWT_TOKEN_HERE"
+            },
+            {
+                  "key": "bankDetailId",
+                  "value": "PASTE_BANK_DETAIL_ID_HERE"
+            },
+            {
+                  "key": "invoiceId",
+                  "value": "INV-1001"
+            },
+            {
+                  "key": "addedBy",
+                  "value": "PASTE_USER_ID_HERE"
+            }
+      ],
+      "item": [
+            {
+                  "name": "Create Bank Detail",
+                  "request": {
+                        "method": "POST",
+                        "header": [
+                              {
+                                    "key": "Content-Type",
+                                    "value": "application/json"
+                              },
+                              {
+                                    "key": "Authorization",
+                                    "value": "Bearer {{token}}"
+                              }
+                        ],
+                        "body": {
+                              "mode": "raw",
+                              "raw": "{\n  \"accountHolderName\": \"John Doe\",\n  \"bankName\": \"ABC Bank\",\n  \"accountNumber\": \"1234567890\",\n  \"branchName\": \"Downtown Branch\",\n  \"routingNumber\": \"1100001\",\n  \"currency\": \"USD\",\n  \"country\": \"USA\",\n  \"currentBalance\": 1500.75,\n  \"invoiceId\": \"{{invoiceId}}\"\n}"
+                        },
+                        "url": {
+                              "raw": "{{baseUrl}}/api/v1/bank-details/create",
+                              "host": ["{{baseUrl}}"],
+                              "path": ["api", "v1", "bank-details", "create"]
+                        }
+                  }
+            },
+            {
+                  "name": "Update Bank Detail",
+                  "request": {
+                        "method": "PUT",
+                        "header": [
+                              {
+                                    "key": "Content-Type",
+                                    "value": "application/json"
+                              },
+                              {
+                                    "key": "Authorization",
+                                    "value": "Bearer {{token}}"
+                              }
+                        ],
+                        "body": {
+                              "mode": "raw",
+                              "raw": "{\n  \"accountHolderName\": \"John Doe Updated\",\n  \"bankName\": \"ABC Bank\",\n  \"accountNumber\": \"1234567890\",\n  \"branchName\": \"Main Branch\",\n  \"routingNumber\": \"1100001\",\n  \"currency\": \"USD\",\n  \"country\": \"USA\",\n  \"currentBalance\": 2100.25\n}"
+                        },
+                        "url": {
+                              "raw": "{{baseUrl}}/api/v1/bank-details/update/{{bankDetailId}}",
+                              "host": ["{{baseUrl}}"],
+                              "path": ["api", "v1", "bank-details", "update", "{{bankDetailId}}"]
+                        }
+                  }
+            },
+            {
+                  "name": "Delete Bank Detail",
+                  "request": {
+                        "method": "DELETE",
+                        "header": [
+                              {
+                                    "key": "Authorization",
+                                    "value": "Bearer {{token}}"
+                              }
+                        ],
+                        "url": {
+                              "raw": "{{baseUrl}}/api/v1/bank-details/delete/{{bankDetailId}}",
+                              "host": ["{{baseUrl}}"],
+                              "path": ["api", "v1", "bank-details", "delete", "{{bankDetailId}}"]
+                        }
+                  }
+            },
+            {
+                  "name": "Get Bank Detail By Invoice Id",
+                  "request": {
+                        "method": "GET",
+                        "header": [
+                              {
+                                    "key": "Authorization",
+                                    "value": "Bearer {{token}}"
+                              }
+                        ],
+                        "url": {
+                              "raw": "{{baseUrl}}/api/v1/bank-details/invoice/{{invoiceId}}",
+                              "host": ["{{baseUrl}}"],
+                              "path": ["api", "v1", "bank-details", "invoice", "{{invoiceId}}"]
+                        }
+                  }
+            },
+            {
+                  "name": "Get Bank Details By Added By",
+                  "request": {
+                        "method": "GET",
+                        "header": [
+                              {
+                                    "key": "Authorization",
+                                    "value": "Bearer {{token}}"
+                              }
+                        ],
+                        "url": {
+                              "raw": "{{baseUrl}}/api/v1/bank-details/added-by/{{addedBy}}",
+                              "host": ["{{baseUrl}}"],
+                              "path": ["api", "v1", "bank-details", "added-by", "{{addedBy}}"]
+                        }
+                  }
+            }
+      ]
+}
