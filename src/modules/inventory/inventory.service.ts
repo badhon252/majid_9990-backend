@@ -128,6 +128,14 @@ const extractBarcodeRowsFromFile = (filePath: string): TBarcodeBulkRow[] => {
 };
 
 const createInventory = async (payload: Partial<IInventory>, file?: any) => {
+      if (payload.imeiNumber) {
+            const existingInventory = await Inventory.findOne({ imeiNumber: payload.imeiNumber });
+
+            if (existingInventory) {
+                  throw new AppError(`Inventory with IMEI ${payload.imeiNumber} already exists`, 409);
+            }
+      }
+
       if (file) {
             const cloudinaryResponse = await uploadToCloudinary(file.path);
             if (cloudinaryResponse) {

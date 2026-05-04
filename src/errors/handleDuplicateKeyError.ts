@@ -2,24 +2,25 @@ import { TErrorSources, TGenericErrorResponse } from '../interface/error';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const handleDuplicateError = (err: any): TGenericErrorResponse => {
-      // Extract value within double quotes using regex
-      const match = err.message.match(/"([^"]*)"/);
+      const keyValue = err?.keyValue ?? {};
+      const entries = Object.entries(keyValue);
+      const errorSources: TErrorSources = entries.length
+            ? entries.map(([path, value]) => ({
+                    path,
+                    message: `${value} already exists`,
+              }))
+            : [
+                    {
+                          path: '',
+                          message: 'Duplicate value already exists',
+                    },
+              ];
 
-      // The extracted value will be in the first capturing group
-      const extractedMessage = match && match[1];
-
-      const errorSources: TErrorSources = [
-            {
-                  path: '',
-                  message: `${extractedMessage} is already exists`,
-            },
-      ];
-
-      const statusCode = 400;
+      const statusCode = 409;
 
       return {
             statusCode,
-            message: 'Invalid ID',
+            message: 'Duplicate entry',
             errorSources,
       };
 };
